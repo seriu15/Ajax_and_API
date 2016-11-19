@@ -1,0 +1,7 @@
+@import url('https://fonts.googleapis.com/css?family=Lato');
+
+body{
+	background: linear-gradient(-143deg, #9a3939, #ffab4a);
+	min-height: 100vh;
+	font-family: 'Lato', sans-serif;
+}
