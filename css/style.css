@@ -1,7 +1,47 @@
 @import url('https://fonts.googleapis.com/css?family=Lato');
 
-body{
-	background: linear-gradient(-143deg, #9a3939, #ffab4a);
+body {
+	background: #55ACEE;
+	color: #FFF;
 	min-height: 100vh;
 	font-family: 'Lato', sans-serif;
+	margin: 0;
+}
+main {
+	text-align: center;
+}
+
+h1 {
+	margin: 0 0 70px 0px;
+	padding-top: 40px;
+}
+
+button.trigger, a.tweet {
+	display: block;
+	background: #55ACEE;
+	border: 1px solid #FFF;
+	width: 250px;
+	height: 30px;
+	font-size: 18px;
+	color: #FFF;
+	margin: 0 auto;
+	cursor: pointer; 
+}
+button.trigger {
+	margin: 80px auto 25px auto;
+}
+
+a.tweet {
+	line-height: 28px;
+	text-decoration: none;
+}
+
+a:link, a:visited, a:active {
+    color: #FFF;
+}
+
+/* mouse over link */
+a:hover, button.trigger:hover {
+    color: #55ACEE;
+		background: #FFF;
 }
