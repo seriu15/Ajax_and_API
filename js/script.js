@@ -1,207 +1,99 @@
-$(function() {
+var url = 'https://restcountries.eu/rest/v1/name/';
+var borderUrl = 'https://restcountries.eu/rest/v1/alpha/';
+var countriesList = $('#countries');
+var tableTemplate = $(".table-template");
+var key;
+var mycheckBox = $('#myCheckBox')
 
-	function randomString() {
-    var chars = '0123456789abcdefghiklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXTZ';
-    var str = '';
-    var i = 0;
-    for (i = 0; i < 10; i++) {
-        str += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return str;
+$('#search').click(searchCountries);
+$('#country-name').bind('keypress', function(e) {
+	var value = $(this).val();
+	key = e.keyCode;
+  if((value.length > 1) && (key == 13)){
+    searchCountries();
+  }
+});
+$('#country-name').keyup(function(event){
+	var value = $(this).val();
+	if((value.length > 2) || ((value.length > 1) && (key == 13))){
+		searchCountries();
+	} else {
+		countriesList.empty();
 	}
+});
 
-	function Board(title){
-		var self = this;
-		this.id = randomString;
-		this.title = title;
-		this.$element = createBoard();
-		this.columns = [];
-
-		function createBoard() {
-			// TWORZENIE ELEMENTÓW SKŁADOWYCH KOLUMNY
-			var $board = $('<div>').addClass('board');
-			var $boardTitle = $('<h2>').addClass('board-title').text(self.title);
-			var $boardDelete = $('<button>').addClass('btn-delete').html('<i class="fa fa-times-circle" aria-hidden="true"></i>');
-			var $boardAddColumn = $('<button>').attr('type','button').addClass('create-column').attr('data-toggle', 'modal').attr('data-target','#myModal').attr('data-whatever','kolumny').text('Dodaj kolumnę');
-			var $boardAddColumnContainer = $('<div>').addClass('column-container');
-
-			// PODPINANIE ODPOWIEDNICH ZDARZEŃ
-			$boardDelete.click(function() {
-				self.removeBoard();
-			});
-
-			// KONSTRUOWANIE ELEMENTU TABLICY
-			$board.append($boardTitle)
-							.append($boardDelete)
-							.append($boardAddColumn)
-							.append($boardAddColumnContainer);
-
-			// ZWRACANIE STWORZONEJ  TABLICY
-			return $board;
-		}
+$('#myCheckBoxButton').click(function(){
+	if(mycheckBox.hasClass('hidden')){
+		mycheckBox.removeClass('hidden');
+	} else {
+		mycheckBox.addClass('hidden');
 	}
+});
 
-	Board.prototype = {
-    addColumn: function(column) {
-			var newColumn = column.$element;
-			newColumn.data('column-number', this.columns.length);
-			this.$element.children('.column-container').append(newColumn);  //data-column-number
-			this.columns.push(column);
-			this.cards = [];
-
-		},
-    removeBoard: function() {
-      this.$element.remove();
-    }
-	};
-
-	function Column(name) {
-		var self = this;
-		this.id = randomString();
-    this.name = name;
-    this.$element = createColumn();
-
-		function createColumn() {
-			// TWORZENIE ELEMENTÓW SKŁADOWYCH KOLUMNY
-			var $column = $('<div>').addClass('column');
-  		var $columnTitle = $('<h2>').addClass('column-title').text(self.name);
-  		var $columnCardList = $('<ul>').addClass('column-card-list');
-  		var $columnDelete = $('<button>').addClass('btn-delete').html('<i class="fa fa-times-circle" aria-hidden="true"></i>');
-  		var $columnAddCard = $('<button>').attr('type','button').addClass('add-card').attr('data-toggle', 'modal').attr('data-target','#myModal').attr('data-whatever','karty').text('Dodaj kartę');
-
-			// PODPINANIE ODPOWIEDNICH ZDARZEŃ
-			$columnDelete.click(function() {
-    		self.removeColumn();
-  		});
-
-			// KONSTRUOWANIE ELEMENTU KOLUMNY
-			$column.append($columnTitle)
-					    .append($columnDelete)
-					    .append($columnAddCard)
-					    .append($columnCardList);
-
-			// ZWRACANIE STWORZONEJ  KOLUMNY
-			return $column;
-		}
-	}
-
-	Column.prototype = {
-    addCard: function(card) {
-      this.$element.children('ul').append(card.$element);
-			initSortable();
-    },
-    removeColumn: function() {
-      this.$element.remove();
-    }
-	};
-
-	function Card(description) {
-		var self = this;
-		this.id = randomString();
-		this.description = description;
-		this.$element = createCard();
-
-		function createCard() {
-			// TWORZENIE KLOCKÓW
-			var $card = $('<li>').addClass('card');
-			var $cardDescription = $('<p>').addClass('card-description').text(self.description);
-			var $cardDelete = $('<button>').addClass('btn-delete').html('<i class="fa fa-times-circle" aria-hidden="true"></i>');
-
-			// PRZYPIĘCIE ZDARZENIA
-			$cardDelete.click(function(){
-			  self.removeCard();
-			});
-
-			// SKŁADANIE I ZWRACANIE KARTY
-			$card.append($cardDelete).append($cardDescription);
-				return $card;
-		}
-	}
-
-	Card.prototype = {
-		removeCard: function() {
-			this.$element.remove();
-		}
-	}
-
-	var boardsObject = {
-    name: 'Tablica Kanban',
-    addBoard: function(board) {
-      this.$element.append(board.$element.data('board-number', this.boards.length));
-			this.boards.push(board);
-		},
-    $element: $('#boards'),
-		boards: []
-	};
-
-	//Funkcja inicjalizujaca sortowanie kart
-	function initSortable() {
-		$('.board').each(function(){
-			var thisBoardAndColumnCardList = $(this).find('.column-card-list');
-			thisBoardAndColumnCardList.sortable({
-				connectWith: thisBoardAndColumnCardList,
-				placeholder: 'card-placeholder'
-			}).disableSelection();
-		});
-	}
-
-	// Podmiana parametrow modala
-	$('#myModal').on('show.bs.modal', function (event) {
-		var button = $(event.relatedTarget);  // przycisk ktory wywolal modala
-		var recipient = button.data('whatever');
-		var modal = $(this);
-		modal.find('.modal-title').text('Nazwa ' + recipient)
-
-		if(button.data('whatever') == 'tablice') {
-   		$('.btn-confirm').off('click').on('click', function(){
-				var modalInput = $('#message-text').val();
-        boardsObject.addBoard(new Board(modalInput));
-				$('#message-text').val("");
-				$('#myModal').modal('hide');
-   		});
-		} else if(button.data('whatever') == 'kolumny') {
-      $('.btn-confirm').off('click').on('click', function(){
-				var modalInput = $('#message-text').val();
-				boardsObject.boards[button.closest('.board').data('board-number')].addColumn(new Column(modalInput));
-				$('#message-text').val("");
-				$('#myModal').modal('hide');
-				initSortable();
-			});
-    } else if(button.data('whatever') == 'karty') {
-      $('.btn-confirm').off('click').on('click', function(){
-				var modalInput = $('#message-text').val();
-				boardsObject.boards[button.closest('.board').data('board-number')].columns[button.closest('.column').data('column-number')].addCard(new Card(modalInput));
-				$('#message-text').val("");
-				$('#myModal').modal('hide');
-			});
-    }
-		$('.btn-cancel').off('click').on('click', function(){
-			$('#message-text').val("");
-		});
+function searchCountries() {
+	var countryName = $('#country-name').val();
+	if(!countryName.length) countryName = 'Poland';
+	$.ajax({
+		url: url + countryName,
+		method: 'GET',
+		success: showCountriesList,
+		error: notFound
 	});
+}
 
-	// TWORZENIE TABLICY
-	var myFirstBoard = new Board('Tablica');
 
-	// TWORZENIE KOLUMN
-	var todoColumn = new Column('Do zrobienia');
-	var doingColumn = new Column('W trakcie');
-	var doneColumn = new Column('Skończone');
+$('#countries').on('click', '.borders a', function(){
+	var borderClicked = $(this).text();
+	$.ajax({
+		url: borderUrl + borderClicked,
+		method: 'GET',
+		success: showCountriesList,
+		error: notFound
+	});
+});
 
-	// DODAWANIE TABLICY DO KONTENERA
-	boardsObject.addBoard(myFirstBoard);
 
-	// DODAWANIE KOLUMN DO TABLICY
-	myFirstBoard.addColumn(todoColumn);
-	myFirstBoard.addColumn(doingColumn);
-	myFirstBoard.addColumn(doneColumn);
+function showCountriesList(resp) {
+	console.log(resp);
+	countriesList.empty();
+	if (!Array.isArray(resp)) resp = [resp];
+	resp.forEach(function(item) {
+		var newTable = tableTemplate.clone();
+		var myborder = "";
+		item.borders.forEach(function(bor){
+			var $border = "<a href='#'>" + bor + "</a>";
+			if(myborder == ""){
+				myborder = $border;
+			} else {
+				myborder = myborder + ", " + $border;
+			}
+		});
+		$('<li>').html(newTable).appendTo(countriesList)
+													.find('.country').text(item.name).end()
+													.find('.capital').text(item.capital).end()
+													.find('.region').text(item.region).end()
+													.find('.subregion').text(item.subregion).end()
+													.find('.population').text(item.population).end()
+													.find('.demonym').text(item.demonym).end()
+													.find('.timezones').text(item.timezones.join(", ")).end()
+													.find('.borders').html(myborder).end()
+													.find('.nativeName').text(item.nativeName);
+	});
+}
 
-	// TWORZENIE NOWYCH EGZEMPLARZY KART
-	var card1 = new Card('Nowe zadanie');
-	var card2 = new Card('Stworzyć tablice kanban');
+function notFound() {
+	countriesList.empty();
+	$('<li>').text("Not found").appendTo(countriesList);
+}
 
-	// DODAWANIE KART DO KOLUMN
-	todoColumn.addCard(card1);
-	doingColumn.addCard(card2);
-
-})
+$("input[type='checkbox']").change(function() {
+	var $input = $( this );
+	var checkBoxName = ".";
+	checkBoxName += $input.attr('value');
+	if(this.checked){
+		$('table').find(checkBoxName).removeClass('hidden');
+		console.log(checkBoxName);
+	} else {
+		$('table').find(checkBoxName).addClass('hidden');
+	}
+});
